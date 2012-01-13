@@ -32,6 +32,7 @@
 #define VIEW_ROUND_RECT 10.0f
 #define CAS_IMAGE_VERTICAL_INSET 2.0f
 #define CAS_IMAGE_HORIZONTAL_INSET 10.0f
+#define DEFAULT_TABLE_VIEW_CELL_HEIGHT 54.0f
 
 @interface  UICustomActionSheet(Private)
 -(id)valueOfAttribute:(NSString *)param forButtonAtIndex:(NSInteger)index;
@@ -145,7 +146,7 @@
     [gradientLayer2 release];    
 }
 
--(UILabel *)textLabelForButton:(UIButton *)actionSheetButton atIndex:(NSInteger)buttonIndex{
+-(UILabel *)textLabelForButton:(UIView *)actionSheetButton atIndex:(NSInteger)buttonIndex{
     UILabel *textLabel = [[UILabel alloc] initWithFrame:actionSheetButton.bounds];
     textLabel.shadowOffset = CGSizeMake(0.0f, -0.1f);
     textLabel.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.8f];
@@ -175,6 +176,78 @@
         textLabel.highlightedTextColor = highlightedTextColor;
     
     return [textLabel autorelease];
+}
+
+-(void)initializeImageForButton:(UIView *)actionSheetButton 
+                      withLabel:(UILabel *)textLabel
+                          frame:(CGRect) frame
+                        atIndex:(NSInteger)buttonIndex
+{
+    UIImage *buttonImage = [self imageForButtonAtIndex:buttonIndex];
+    if (buttonImage != NULL)
+    {
+        CGFloat imageViewHeight = MIN(frame.size.height - CAS_IMAGE_VERTICAL_INSET * 2.0f, 
+                                      buttonImage.size.height);
+        CGRect imageFrame = CGRectMake(frame.origin.x + CAS_IMAGE_HORIZONTAL_INSET, 
+                                       frame.origin.y + (frame.size.height - imageViewHeight) / 2.0f,
+                                       frame.size.width - 2 * CAS_IMAGE_HORIZONTAL_INSET, 
+                                       imageViewHeight);
+        
+        if ([[self buttonTitleAtIndex:buttonIndex] length] > 0)
+        {   
+            //If both image and text present, show them as in simple UIButton
+            CGFloat scaledImageWidth = buttonImage.size.width * imageViewHeight / buttonImage.size.height;
+            scaledImageWidth = MIN(scaledImageWidth, frame.size.width - CAS_IMAGE_HORIZONTAL_INSET);
+            
+            UIFont *font = textLabel.font;
+            NSString *text = textLabel.text;
+            CGFloat textWidth = [text sizeWithFont:font].width;
+            if (textWidth == 0)
+            {
+                font = [UIFont boldSystemFontOfSize:20.0f];
+                textWidth = [text sizeWithFont:font].width;
+            }
+            
+            if (textWidth  + scaledImageWidth > frame.size.width - CAS_IMAGE_HORIZONTAL_INSET * 2.0f)
+                textLabel.hidden = YES; //If image is too big, then hide text
+            else {
+                //Centering image and text
+                CGFloat totalWidth = scaledImageWidth + CAS_IMAGE_HORIZONTAL_INSET + textWidth;
+                
+                imageFrame.origin.x = round(3.0f + (frame.size.width - totalWidth) / 2.0f);
+                imageFrame.size.width = scaledImageWidth;
+                
+                if ([actionSheetButton isKindOfClass:[UITableViewCell class]])
+                {                    
+                    //If function is used for UITableViewCell than we cannot modify textLabel frame
+                    //Instead of this we will add whitespaces to move text and do not overlap with the image
+                    
+                    while (textWidth < totalWidth)
+                    {
+                        text = [@" " stringByAppendingString:text];
+                        textWidth = [text sizeWithFont:font].width;
+                    }
+                    
+                    textLabel.text = text;
+                }
+                else
+                {
+                    //Change textLabel frame to not overlap with the image
+                    CGRect textFrame = textLabel.frame;
+                    textFrame.origin.x = round(3.0f + (frame.size.width + totalWidth) / 2.0f - textWidth);
+                    textFrame.size.width = textWidth;
+                    textLabel.frame = textFrame;
+                }
+            }
+        }
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:imageFrame];
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
+        imageView.image = buttonImage;
+        imageView.tag = 10.0f;
+        [actionSheetButton addSubview:imageView];
+        [imageView release];
+    }    
 }
 
 -(void)initializeButtonAtIndex:(NSInteger)buttonIndex{
@@ -223,49 +296,11 @@
     //Add new text color
     UILabel *textLabel = [self textLabelForButton:actionSheetButton atIndex:buttonIndex];
     
-    //Prepeare image for button
-    UIImage *buttonImage = [self imageForButtonAtIndex:buttonIndex];
-    if (buttonImage != NULL)
-    {
-        CGFloat imageViewHeight = MIN(frame.size.height - CAS_IMAGE_VERTICAL_INSET * 2.0f, 
-                                      buttonImage.size.height);
-        CGRect imageFrame = CGRectMake(frame.origin.x + CAS_IMAGE_HORIZONTAL_INSET, 
-                                       frame.origin.y + (frame.size.height - imageViewHeight) / 2.0f,
-                                       frame.size.width - 2 * CAS_IMAGE_HORIZONTAL_INSET, 
-                                       imageViewHeight);
-        
-        if ([[self buttonTitleAtIndex:buttonIndex] length] > 0)
-        {   
-            //If both image and text present, show them as in simple UIButton
-            CGFloat scaledImageWidth = buttonImage.size.width * imageViewHeight / buttonImage.size.height;
-            scaledImageWidth = MIN(scaledImageWidth, frame.size.width - CAS_IMAGE_HORIZONTAL_INSET);
-            
-            CGFloat textWidth = [textLabel.text sizeWithFont:textLabel.font].width;
-            
-            if (textWidth  + scaledImageWidth > frame.size.width - CAS_IMAGE_HORIZONTAL_INSET * 2.0f)
-                textLabel.hidden = YES; //If image is too big, then hide text
-            else {
-                //Centering image and text
-                CGFloat totalWidth = scaledImageWidth + CAS_IMAGE_HORIZONTAL_INSET + textWidth;
-            
-                imageFrame.origin.x = round(3.0f + (frame.size.width - totalWidth) / 2.0f);
-                imageFrame.size.width = scaledImageWidth;
-                
-                CGRect textFrame = textLabel.frame;
-                textFrame.origin.x = round(3.0f + (frame.size.width + totalWidth) / 2.0f - textWidth);
-                textFrame.size.width = textWidth;
-                textLabel.frame = textFrame;
-            }
-        }
-        
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:imageFrame];
-        imageView.contentMode = UIViewContentModeScaleAspectFit;
-        imageView.image = buttonImage;
-        [actionSheetButton addSubview:imageView];
-        [imageView release];
-    }
-    
-    
+    [self initializeImageForButton:actionSheetButton 
+                         withLabel:textLabel 
+                             frame:frame 
+                           atIndex:buttonIndex];    
+
     [actionSheetButton addSubview:textLabel];
   
     //Add method to process button pressing
@@ -417,6 +452,113 @@
 
 -(UIImage *)imageForButtonAtIndex:(NSInteger)index{
     return [self valueOfAttribute:@"image" forButtonAtIndex:index];
+}
+
+#pragma mark UITableView delegate methods
+
+//If buttons are too many, then UIActionSheet creates table.
+//Instead of standart buttons UITableViewCell objects are used. 
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+   // UITableViewCell *cell = (UITableViewCell *)[super tableView:tableView cellForRowAtIndexPath:indexPath];
+    
+    static NSString *identifier = @"UICustomActionSheet cell %d";
+    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault 
+                                      reuseIdentifier:identifier];
+          
+    //Add two color border to table
+    CGRect frame = CGRectMake(0.0f, DEFAULT_TABLE_VIEW_CELL_HEIGHT-1.0f, tableView.frame.size.width, 1.0f);
+    UIView *borderView1 = [[UIView alloc] initWithFrame:frame];
+    borderView1.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0.5f];
+    [cell.contentView addSubview:borderView1];
+    [borderView1 release];
+    
+    frame.origin.y = DEFAULT_TABLE_VIEW_CELL_HEIGHT;
+    UIView *borderView2 = [[UIView alloc] initWithFrame:frame];
+    borderView2.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5f];
+    [cell.contentView addSubview:borderView2];
+    [borderView2 release];
+    
+    //Add twocolor border in the top if it is first cell
+    if (indexPath.row == 0)
+    {
+        frame.origin.y = 0.0f;
+        UIView *borderView3 = [[UIView alloc] initWithFrame:frame];
+        borderView3.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0.5f];
+        [cell.contentView addSubview:borderView3];
+        [borderView3 release];
+        
+        frame.origin.y = 1.0f;
+        UIView *borderView4 = [[UIView alloc] initWithFrame:frame];
+        borderView4.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5f];
+        [cell.contentView addSubview:borderView4];
+        [borderView4 release];
+    }   
+    
+    return [cell autorelease];
+}
+
+
+-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell 
+    forRowAtIndexPath:(NSIndexPath *)indexPath{
+    NSInteger buttonIndex = indexPath.row;
+    
+    //If table is present, than it contains neither destructive button nor cancel button.
+    //This buttons are showing as usual but should ignore them, when they are showing.
+    // That's why buttonIndex is incremented.
+    
+    if (self.destructiveButtonIndex != -1 && buttonIndex >= self.destructiveButtonIndex)
+        buttonIndex++;
+    
+    if (self.cancelButtonIndex != -1 && buttonIndex >= self.cancelButtonIndex)
+        buttonIndex++;
+    
+    cell.textLabel.textAlignment = UITextAlignmentCenter;
+    cell.textLabel.text = [self buttonTitleAtIndex:buttonIndex];
+    
+    
+    //Set background color for cell
+    UIColor *backgroundColor = [self colorForButtonAtIndex:buttonIndex];
+    if (backgroundColor != NULL)
+    {
+        UIView *backgroundView = [[UIView alloc] init];
+        backgroundView.backgroundColor = backgroundColor;
+        cell.backgroundView = backgroundView;
+        [backgroundView release];
+    }
+    else
+        cell.backgroundView = NULL;
+    
+    //Set pressed color when cell is selected
+    UIColor *selectedBackgroundColor = [self pressedColorForButtonAtIndex:buttonIndex];
+    if (selectedBackgroundColor != NULL)
+    {
+        UIView *selectedBackgroundView = [[UIView alloc] init];
+        selectedBackgroundView.backgroundColor = selectedBackgroundColor;
+        cell.selectedBackgroundView = selectedBackgroundView;
+        [selectedBackgroundView release];
+    }
+    else
+        cell.selectedBackgroundView = NULL;
+    
+    //Change  cell font
+    UIFont *textFont = [self fontForButtonAtIndex:buttonIndex];
+    if (textFont != NULL)
+        cell.textLabel.font = textFont;
+    
+    //Change cell text color
+    UIColor *textColor = [self textColorForButtonAtIndex:buttonIndex];
+    if (textColor != NULL)
+        cell.textLabel.textColor = textColor;
+    
+    //Set cell textcolor when it is pressed
+    UIColor *highlightedTextColor = [self pressedTextColorForButtonAtIndex:buttonIndex];
+    if (highlightedTextColor == NULL)
+        cell.textLabel.highlightedTextColor = highlightedTextColor;
+    
+    //Add image for cell, if needed
+    CGRect cellFrame = CGRectMake(0.0f, 0.0f, tableView.frame.size.width, DEFAULT_TABLE_VIEW_CELL_HEIGHT);
+    [self initializeImageForButton:cell withLabel:cell.textLabel frame:cellFrame atIndex:buttonIndex];    
 }
 
 #pragma mark free memory

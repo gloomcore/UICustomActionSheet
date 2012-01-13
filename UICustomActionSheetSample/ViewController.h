@@ -33,5 +33,6 @@
 
 -(IBAction)test1:(id)sender;
 -(IBAction)test2;
+-(IBAction)test3;
 
 @end

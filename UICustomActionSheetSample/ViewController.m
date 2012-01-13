@@ -107,6 +107,44 @@
     [sheet autorelease];
 }
 
+
+-(IBAction)test3{
+    UICustomActionSheet *sheet = [[UICustomActionSheet alloc] initWithTitle:nil
+                                                                   delegate:self
+                                                          cancelButtonTitle:@"Modified Cancel Button"
+                                                     destructiveButtonTitle:@"Modified Destructive Button"
+                                                          otherButtonTitles:@"Standart Button", 
+                                  @"Facebook style", 
+                                  @"Twitter style", nil];
+    
+    
+    [sheet setColor:RGBCOLOR(55, 85, 155) forButtonAtIndex:2];
+    [sheet setColor:RGBCOLOR(60, 190, 200) forButtonAtIndex:3];
+    
+    [sheet setTextColor:[UIColor whiteColor] forButtonAtIndex:2];
+    [sheet setTextColor:[UIColor whiteColor] forButtonAtIndex:3];
+    
+    [sheet setImage:[UIImage imageNamed:@"Facebook.png"] forButtonAtIndex:2];
+    [sheet setImage:[UIImage imageNamed:@"twitter.png"] forButtonAtIndex:3];
+    
+    [sheet setFont:[UIFont italicSystemFontOfSize:20.0f] forButtonAtIndex:0];
+    [sheet setTextColor:[[UIColor orangeColor] colorWithAlphaComponent:0.8f] forButtonAtIndex:4];
+    
+    UIColor *myColor = RGBCOLOR(200, 100, 0);
+    for (int i=1; i<=7; i++)
+    {
+        [sheet addButtonWithTitle:[NSString stringWithFormat:@"Additional Button %d", i]];
+        
+        [sheet setColor:[myColor colorWithAlphaComponent:1.0f - 0.1f * i] forButtonAtIndex:i + 4];
+        [sheet setPressedColor:[UIColor orangeColor] forButtonAtIndex:i + 4];
+        [sheet setPressedTextColor:[UIColor whiteColor] forButtonAtIndex:i + 4];
+    }
+    
+    [sheet showFromTabBar:tabBar];
+    
+    [sheet autorelease];
+}
+
 #pragma mark UIActionSheetDelegate methods
 
 -(void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex{
