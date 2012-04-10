@@ -107,45 +107,6 @@
 
 #pragma mark Customize button methods
 
--(void)addColorGradients:(UIColor *)color forLayer:(CALayer *)bgLayer{
-    //Using dirty white color of backgroud color
-    bgLayer.backgroundColor = [UIColor colorWithWhite:0.95f alpha:1.0f].CGColor;
-    
-    //If background color is set, build gradient layers for current color
-    CGRect firstFrame = bgLayer.bounds, secondFrame = bgLayer.bounds;
-    firstFrame.size.height = bgLayer.bounds.size.height / 2.0f;
-    secondFrame.size.height = bgLayer.bounds.size.height / 2.0f;
-    secondFrame.origin.y = bgLayer.bounds.size.height / 2.0f;
-    
-    //Upper linear gradient preparing
-    CAGradientLayer *gradientLayer1 = [[CAGradientLayer alloc] init];
-    [gradientLayer1 setFrame:firstFrame];
-    NSArray *colors1 = [NSArray arrayWithObjects:
-                        (id)[color colorWithAlphaComponent:0.4f].CGColor,
-                        (id)[color colorWithAlphaComponent:0.7f].CGColor,
-                        nil];
-    [gradientLayer1 setColors:colors1];
-    gradientLayer1.startPoint = CGPointMake(0.0f, 0.0f);
-    gradientLayer1.endPoint = CGPointMake(0.0f, 1.0f);
-    
-    //Lower linear gradient prepearing
-    CAGradientLayer *gradientLayer2 = [[CAGradientLayer alloc] init];
-    [gradientLayer2 setFrame:secondFrame];
-    NSArray *colors2 = [NSArray arrayWithObjects:
-                        (id)[color colorWithAlphaComponent:1.0f].CGColor,
-                        (id)[color colorWithAlphaComponent:0.85f].CGColor,
-                        nil];
-    [gradientLayer2 setColors:colors2];
-    gradientLayer2.startPoint = CGPointMake(0.0f, 0.0f);
-    gradientLayer2.endPoint = CGPointMake(0.0f, 1.0f);
-    
-    [bgLayer insertSublayer:gradientLayer1 atIndex:0];
-    [bgLayer insertSublayer:gradientLayer2 atIndex:1];
-    
-    [gradientLayer1 release];
-    [gradientLayer2 release];    
-}
-
 -(UILabel *)textLabelForButton:(UIView *)actionSheetButton atIndex:(NSInteger)buttonIndex{
     UILabel *textLabel = [[UILabel alloc] initWithFrame:actionSheetButton.bounds];
     textLabel.shadowOffset = CGSizeMake(0.0f, -0.1f);
@@ -250,6 +211,41 @@
     }    
 }
 
+-(NSArray *)gradientColorsArrayForColor:(UIColor *)color{
+    if (color == NULL)
+        return NULL;
+    else
+        return [NSArray arrayWithObjects:
+                        (id)[color colorWithAlphaComponent:0.4f].CGColor,
+                        (id)[color colorWithAlphaComponent:0.7f].CGColor,
+                        (id)[color colorWithAlphaComponent:1.0f].CGColor,
+                        (id)[color colorWithAlphaComponent:0.85f].CGColor,
+                        nil];
+};
+
+-(CAGradientLayer *)buttonLayerWithFrame:(CGRect)frame andColor:(UIColor *)color{
+    BOOL isIpad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+    CAGradientLayer *gradientLayer = [[CAGradientLayer alloc] init];
+    gradientLayer.frame = frame;
+    gradientLayer.masksToBounds = YES;
+    gradientLayer.cornerRadius = isIpad ? 4.0f : 8.5f;
+    gradientLayer.locations = [NSArray arrayWithObjects:
+                               [NSNumber numberWithFloat:0.0f],
+                               [NSNumber numberWithFloat:0.5f],
+                               [NSNumber numberWithFloat:0.5f],
+                               [NSNumber numberWithFloat:1.0f],
+                               nil];
+    
+    gradientLayer.colors = [self gradientColorsArrayForColor:color];
+    
+    if (color == NULL)
+        gradientLayer.backgroundColor = [UIColor clearColor].CGColor;
+    else
+        gradientLayer.backgroundColor = [UIColor colorWithWhite:0.95f alpha:1.0f].CGColor;
+    
+    return [gradientLayer autorelease];
+}
+
 -(void)initializeButtonAtIndex:(NSInteger)buttonIndex{
     BOOL titlePresent = (self.title != NULL);
     UIButton *actionSheetButton = (UIButton *)[self.subviews objectAtIndex:buttonIndex + titlePresent];
@@ -265,34 +261,10 @@
                            actionSheetButton.frame.size.height - 7.0f);
     
     
-    UIColor *colors[2] = {[self colorForButtonAtIndex:buttonIndex], 
-                          [self pressedColorForButtonAtIndex:buttonIndex]};
-    
-    for (int index=0; index<2; index++)
-    {
-        CALayer *bgLayer = [[CALayer alloc] init];
-        bgLayer.frame = frame;
-        bgLayer.cornerRadius = isIpad ? 4.0f : 8.5f;
-        bgLayer.masksToBounds = YES;
-        UIColor *color = colors[index];
-        
-        //If color is not set, than you will button as it should be by default.
-        if (color == nil)
-        {
-            bgLayer.name = @"hidden";
-            bgLayer.backgroundColor = [UIColor clearColor].CGColor;
-        }
-        else
-        {
-            bgLayer.name = @"shown";
-            [self addColorGradients:color forLayer:bgLayer];
-        }
-        
-        bgLayer.opacity = 1.0f - index;
-        [actionSheetButton.layer insertSublayer:bgLayer atIndex:index];
-        [bgLayer release];
-    }
-    
+    UIColor *gradientColor = [self colorForButtonAtIndex:buttonIndex];
+    CAGradientLayer *bgLayer = [self buttonLayerWithFrame:frame andColor:gradientColor];
+    [actionSheetButton.layer insertSublayer:bgLayer atIndex:0];
+
     //Add new text color
     UILabel *textLabel = [self textLabelForButton:actionSheetButton atIndex:buttonIndex];
     
@@ -315,27 +287,27 @@
  
 //Show other colors, when button is touched down.
 -(void)highlightButton:(UIView *)sender{
-    CALayer *firstLayer = [[sender.layer  sublayers] objectAtIndex:0],
-            *secondLayer = [[sender.layer sublayers] objectAtIndex:1];
+    BOOL titlePresent = (self.title != NULL);
+    NSInteger index = [self.subviews indexOfObject:sender] - titlePresent;
     
-    if ([secondLayer.name isEqualToString:@"hidden"])
-        firstLayer.opacity = 0.0f;
-    else
-        secondLayer.opacity = 1.0f;
-        
+    CAGradientLayer *gradientLayer = (CAGradientLayer *)[[sender.layer  sublayers] objectAtIndex:0];
+    UIColor *color = [self pressedColorForButtonAtIndex:index];
+    gradientLayer.colors = [self gradientColorsArrayForColor:color];
+    gradientLayer.opacity = (CGFloat)(color != NULL);
+    
     UILabel *textLabel = [sender.subviews lastObject];
     textLabel.highlighted = YES;
 }
      
 //Show standart colors, when button is touched up.
 -(void)leaveButton:(UIView *)sender{
-    CALayer *firstLayer = [[sender.layer  sublayers] objectAtIndex:0],
-            *secondLayer = [[sender.layer sublayers] lastObject];
+    BOOL titlePresent = (self.title != NULL);
+    NSInteger index = [self.subviews indexOfObject:sender] - titlePresent;
     
-    if ([secondLayer.name isEqualToString:@"hidden"])
-        firstLayer.opacity = 1.0f;
-    else
-        secondLayer.opacity = 0.0f;
+    CAGradientLayer *gradientLayer = (CAGradientLayer *)[[sender.layer  sublayers] objectAtIndex:0];
+    UIColor *color = [self pressedColorForButtonAtIndex:index];
+    gradientLayer.colors = [self gradientColorsArrayForColor:color];
+    gradientLayer.opacity = (CGFloat)(color != NULL);
          
     UILabel *textLabel = [sender.subviews lastObject];
     textLabel.highlighted = NO;
