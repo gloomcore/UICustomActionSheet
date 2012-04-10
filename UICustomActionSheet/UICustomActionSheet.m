@@ -237,11 +237,8 @@
                                nil];
     
     gradientLayer.colors = [self gradientColorsArrayForColor:color];
-    
-    if (color == NULL)
-        gradientLayer.backgroundColor = [UIColor clearColor].CGColor;
-    else
-        gradientLayer.backgroundColor = [UIColor colorWithWhite:0.95f alpha:1.0f].CGColor;
+    gradientLayer.backgroundColor = [UIColor colorWithWhite:0.95f alpha:1.0f].CGColor;
+    gradientLayer.opacity = (CGFloat)(color != NULL);
     
     return [gradientLayer autorelease];
 }
