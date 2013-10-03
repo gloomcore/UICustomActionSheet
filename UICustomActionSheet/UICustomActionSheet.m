@@ -60,6 +60,7 @@
         if (destructiveButtonTitle != nil)
         {
             self.destructiveButtonIndex = [self addButtonWithTitle:destructiveButtonTitle];
+            [self setColor:[UIColor redColor] forButtonAtIndex:self.destructiveButtonIndex];
         }
                 
         va_list arglist;
@@ -77,6 +78,7 @@
         if (cancelButtonTitle != nil)
         {
             self.cancelButtonIndex = [self addButtonWithTitle:cancelButtonTitle];
+            [self setColor:[UIColor blackColor] forButtonAtIndex:self.cancelButtonIndex];
         }                
     }
     
@@ -94,7 +96,10 @@
         [dict setObject:title forKey:@"text"];
     
     [_buttonAttributes insertObject:dict atIndex:index];
-    
+  
+    [self setColor:[UIColor lightGrayColor] forButtonAtIndex:index];
+    [self setPressedColor:[UIColor blueColor] forButtonAtIndex:index];
+
     return index;
 }
 
@@ -136,7 +141,7 @@
     else
         textLabel.highlightedTextColor = highlightedTextColor;
     
-    return [textLabel autorelease];
+    return textLabel;
 }
 
 -(void)initializeImageForButton:(UIView *)actionSheetButton 
@@ -207,7 +212,6 @@
         imageView.image = buttonImage;
         imageView.tag = 10.0f;
         [actionSheetButton addSubview:imageView];
-        [imageView release];
     }    
 }
 
@@ -240,7 +244,7 @@
     gradientLayer.backgroundColor = [UIColor colorWithWhite:0.95f alpha:1.0f].CGColor;
     gradientLayer.opacity = (CGFloat)(color != NULL);
     
-    return [gradientLayer autorelease];
+    return gradientLayer;
 }
 
 -(void)initializeButtonAtIndex:(NSInteger)buttonIndex{
@@ -440,13 +444,11 @@
     UIView *borderView1 = [[UIView alloc] initWithFrame:frame];
     borderView1.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0.5f];
     [cell.contentView addSubview:borderView1];
-    [borderView1 release];
     
     frame.origin.y = DEFAULT_TABLE_VIEW_CELL_HEIGHT;
     UIView *borderView2 = [[UIView alloc] initWithFrame:frame];
     borderView2.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5f];
     [cell.contentView addSubview:borderView2];
-    [borderView2 release];
     
     //Add twocolor border in the top if it is first cell
     if (indexPath.row == 0)
@@ -455,16 +457,14 @@
         UIView *borderView3 = [[UIView alloc] initWithFrame:frame];
         borderView3.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0.5f];
         [cell.contentView addSubview:borderView3];
-        [borderView3 release];
         
         frame.origin.y = 1.0f;
         UIView *borderView4 = [[UIView alloc] initWithFrame:frame];
         borderView4.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5f];
         [cell.contentView addSubview:borderView4];
-        [borderView4 release];
     }   
     
-    return [cell autorelease];
+    return cell;
 }
 
 
@@ -493,7 +493,6 @@
         UIView *backgroundView = [[UIView alloc] init];
         backgroundView.backgroundColor = backgroundColor;
         cell.backgroundView = backgroundView;
-        [backgroundView release];
     }
     else
         cell.backgroundView = NULL;
@@ -505,7 +504,6 @@
         UIView *selectedBackgroundView = [[UIView alloc] init];
         selectedBackgroundView.backgroundColor = selectedBackgroundColor;
         cell.selectedBackgroundView = selectedBackgroundView;
-        [selectedBackgroundView release];
     }
     else
         cell.selectedBackgroundView = NULL;
@@ -528,14 +526,6 @@
     //Add image for cell, if needed
     CGRect cellFrame = CGRectMake(0.0f, 0.0f, tableView.frame.size.width, DEFAULT_TABLE_VIEW_CELL_HEIGHT);
     [self initializeImageForButton:cell withLabel:cell.textLabel frame:cellFrame atIndex:buttonIndex];    
-}
-
-#pragma mark free memory
-
--(void)dealloc{
-    [_buttonAttributes release];
-    
-    [super dealloc];
 }
 
 @end
