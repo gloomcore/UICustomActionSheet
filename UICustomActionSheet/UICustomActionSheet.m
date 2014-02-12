@@ -32,11 +32,22 @@
 #define VIEW_ROUND_RECT 10.0f
 #define CAS_IMAGE_VERTICAL_INSET 2.0f
 #define CAS_IMAGE_HORIZONTAL_INSET 10.0f
-#define DEFAULT_TABLE_VIEW_CELL_HEIGHT 54.0f
+#define DEFAULT_TABLE_VIEW_CELL_HEIGHT_OLD 54.0f
+#define DEFAULT_TABLE_VIEW_CELL_HEIGHT_IOS7 44.0f
+#define DEFAULT_TABLE_VIEW_CELL_HEIGHT (_isFlatDesign ? DEFAULT_TABLE_VIEW_CELL_HEIGHT_IOS7 : DEFAULT_TABLE_VIEW_CELL_HEIGHT_OLD)
+#define WINDOW_WIDTH 320.0f
+#define IOS7_RECT_MARGIN 8.0f
+#define IOS7_BUTTON_ALPHA_COMPONENT 0.9f
+#define NUMBER_OF_BUTTONS_FOR_TABLE 5
+
+#ifndef SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#endif
 
 @interface  UICustomActionSheet(Private)
 -(id)valueOfAttribute:(NSString *)param forButtonAtIndex:(NSInteger)index;
 -(void)setValue:(id)value ofAttribute:(NSString *)param forButtonAtIndex:(NSInteger)index;
+-(BOOL)isTableViewDisplayed;
 
 -(NSMutableDictionary *)paramsForButtonWithIndex:(NSInteger)index;
 @end
@@ -87,7 +98,11 @@
 
 -(NSInteger)addButtonWithTitle:(NSString *)title{
     //Use title button as "", to cancel text drawing by superclass.
-    NSInteger index = [super addButtonWithTitle:@""];
+    NSInteger index;
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+        index = [super addButtonWithTitle:title];
+    else
+        index = [super addButtonWithTitle:@""];
     
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     if (title != NULL)
@@ -105,6 +120,12 @@
     return text;
 }
 
+#pragma mark Table View check
+
+-(BOOL)isTableViewDisplayed{
+    return [self numberOfButtons] >= NUMBER_OF_BUTTONS_FOR_TABLE && !_isIpad;
+}
+
 #pragma mark Customize button methods
 
 -(UILabel *)textLabelForButton:(UIView *)actionSheetButton atIndex:(NSInteger)buttonIndex{
@@ -112,7 +133,7 @@
     textLabel.shadowOffset = CGSizeMake(0.0f, -0.1f);
     textLabel.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.8f];
     textLabel.text = [self buttonTitleAtIndex:buttonIndex];
-    textLabel.textAlignment = UITextAlignmentCenter;
+    textLabel.textAlignment = NSTextAlignmentCenter;
     textLabel.backgroundColor = [UIColor clearColor];
     
     UIFont *textFont = [self fontForButtonAtIndex:buttonIndex];
@@ -243,43 +264,159 @@
     return [gradientLayer autorelease];
 }
 
--(void)initializeButtonAtIndex:(NSInteger)buttonIndex{
+-(void)initializeButtonAtIndexForSquaroDesign:(NSInteger)buttonIndex{
     BOOL titlePresent = (self.title != NULL);
     UIButton *actionSheetButton = (UIButton *)[self.subviews objectAtIndex:buttonIndex + titlePresent];
     [actionSheetButton.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [actionSheetButton.layer.sublayers makeObjectsPerformSelector:@selector(removeFromSuperlayer)];
     
-    BOOL isIpad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
     CGRect frame = actionSheetButton.bounds;
     
-    if (!isIpad)
-        frame = CGRectMake(3.2f, 3.0f, 
-                           actionSheetButton.frame.size.width - 6.0f, 
+    if (!_isIpad)
+        frame = CGRectMake(3.2f, 3.0f,
+                           actionSheetButton.frame.size.width - 6.0f,
                            actionSheetButton.frame.size.height - 7.0f);
     
     
     UIColor *gradientColor = [self colorForButtonAtIndex:buttonIndex];
     CAGradientLayer *bgLayer = [self buttonLayerWithFrame:frame andColor:gradientColor];
     [actionSheetButton.layer insertSublayer:bgLayer atIndex:0];
-
+    
     //Add new text color
     UILabel *textLabel = [self textLabelForButton:actionSheetButton atIndex:buttonIndex];
     
-    [self initializeImageForButton:actionSheetButton 
-                         withLabel:textLabel 
-                             frame:frame 
-                           atIndex:buttonIndex];    
-
-    [actionSheetButton addSubview:textLabel];
-  
-    //Add method to process button pressing
-    [actionSheetButton addTarget:self 
-                          action:@selector(highlightButton:) 
-                forControlEvents:UIControlEventTouchDown];
+    [self initializeImageForButton:actionSheetButton
+                         withLabel:textLabel
+                             frame:frame
+                           atIndex:buttonIndex];
     
-    [actionSheetButton addTarget:self 
-                          action:@selector(leaveButton:) 
-                forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside];
+    [actionSheetButton addSubview:textLabel];
+    
+    //Add method to process button pressing
+     [actionSheetButton addTarget:self
+     action:@selector(highlightButton:)
+     forControlEvents:UIControlEventTouchDown];
+     
+     [actionSheetButton addTarget:self
+     action:@selector(leaveButton:)
+     forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside];
+    
+}
+
+- (UIImage *)imageWithColor:(UIColor *)color{
+    if (color == NULL) return NULL;
+    
+    CGRect rect = CGRectMake(0, 0, WINDOW_WIDTH, 1);
+    CGFloat margin = _isIpad ? 0.0f : IOS7_RECT_MARGIN;
+    CGRect fillRect = CGRectMake(margin, 0,
+                                 WINDOW_WIDTH - 2 * margin, 1.0f);
+    
+    // Create a 1 by 1 pixel context
+    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0);
+    UIColor *fillColor = [color colorWithAlphaComponent:IOS7_BUTTON_ALPHA_COMPONENT];
+    [fillColor setFill];
+    UIRectFill(fillRect);   // Fill it with your color
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return image;
+}
+
+-(void)setRoundingCorners:(UIRectCorner)roundingCorner forButton:(UIButton *)actionButton{
+    CGRect maskRect = [actionButton bounds];
+    maskRect.origin.x += IOS7_RECT_MARGIN;
+    maskRect.size.width -= 2 * IOS7_RECT_MARGIN;
+    
+    UIBezierPath *maskPath;
+    maskPath = [UIBezierPath bezierPathWithRoundedRect:maskRect byRoundingCorners:roundingCorner
+                                           cornerRadii:CGSizeMake(3.5, 3.5)];
+    
+    
+    CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
+    maskLayer.frame = actionButton.bounds;
+    maskLayer.path = maskPath.CGPath;
+    actionButton.layer.mask = maskLayer;
+    [maskLayer release];
+}
+
+
+-(void)initializeButtonAtIndexForFlatDesign:(NSInteger)buttonIndex{
+    
+    BOOL titlePresent = (self.title != NULL);
+    NSInteger flatButtonIndex =  (_isIpad ? 0 : 1) + buttonIndex + titlePresent;
+    UIButton *actionSheetButton = (UIButton *)[self.subviews objectAtIndex:flatButtonIndex];
+    
+    for (UIView *subview in actionSheetButton.subviews) {
+        NSLog(@"Current subiview: %@", subview);
+    }
+    
+    UIFont *textFont = [self fontForButtonAtIndex:buttonIndex];
+    //If font is not customized use standart font of UIActionSheet
+    if (textFont != NULL)
+        actionSheetButton.titleLabel.font = textFont;
+    
+    UIColor *textColor = [self textColorForButtonAtIndex:buttonIndex];
+    if (textColor != NULL)
+        [actionSheetButton setTitleColor:textColor forState:UIControlStateNormal];
+    
+    UIColor *highlightedTextColor = [self pressedTextColorForButtonAtIndex:buttonIndex];
+    if (highlightedTextColor == NULL)
+        [actionSheetButton setTitleColor:highlightedTextColor forState:UIControlStateSelected];
+    
+    UIImage *image = [self  imageForButtonAtIndex:buttonIndex];
+    if (image != NULL) {
+        if (image.size.height > actionSheetButton.bounds.size.height) {
+            image = [UIImage imageWithCGImage:[image CGImage]
+                                scale:(image.scale * image.size.height / actionSheetButton.bounds.size.height)
+                          orientation:(image.imageOrientation)];
+        }
+        
+        [actionSheetButton setImage:image forState:UIControlStateNormal];
+        [actionSheetButton setImageEdgeInsets:UIEdgeInsetsMake(.0f, .0f, .0f, 20.0f)];
+        actionSheetButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    
+    UIColor *backgroundColor = [self colorForButtonAtIndex:buttonIndex];
+    if (backgroundColor != NULL)
+    {
+        UIImage *backgroundImage = [self imageWithColor:backgroundColor];
+        [actionSheetButton setBackgroundImage:backgroundImage forState:UIControlStateNormal];
+    }
+    
+    UIColor *selectedColor = [self pressedColorForButtonAtIndex:buttonIndex];
+    if (selectedColor != NULL){
+        UIImage *selectedBackgroud = [self imageWithColor:selectedColor];
+        [actionSheetButton setBackgroundImage:selectedBackgroud forState:UIControlStateSelected];
+    }
+    
+    if (backgroundColor != NULL || selectedColor != NULL) {
+       // [actionSheetButton setContentEdgeInsets:UIEdgeInsetsMake(1.0f, 20.0f, 1.0f, 20.0f)];
+        
+        if (!_isIpad){
+            if (buttonIndex == [self cancelButtonIndex]) {
+                [self setRoundingCorners:UIRectCornerAllCorners
+                               forButton:actionSheetButton];
+            }
+            else if (([self isTableViewDisplayed] && buttonIndex == [self destructiveButtonIndex])
+                     || (titlePresent && buttonIndex == 0)){
+                [self setRoundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight
+                               forButton:actionSheetButton];
+            }
+            else if (buttonIndex == self.numberOfButtons - 1 ||
+                     (buttonIndex == self.numberOfButtons - 2 && self.cancelButtonIndex == self.numberOfButtons - 1))
+            {
+                [self setRoundingCorners:UIRectCornerBottomLeft | UIRectCornerBottomRight
+                               forButton:actionSheetButton];
+            }
+        }
+    }
+}
+
+-(void)initializeButtonAtIndex:(NSInteger)buttonIndex{
+    if (_isFlatDesign)
+        [self initializeButtonAtIndexForFlatDesign:buttonIndex];
+    else
+        [self initializeButtonAtIndexForSquaroDesign:buttonIndex];
 }
  
 //Show other colors, when button is touched down.
@@ -288,8 +425,10 @@
     NSInteger index = [self.subviews indexOfObject:sender] - titlePresent;
     
     CAGradientLayer *gradientLayer = (CAGradientLayer *)[[sender.layer  sublayers] objectAtIndex:0];
+    
     UIColor *color = [self pressedColorForButtonAtIndex:index];
-    gradientLayer.colors = [self gradientColorsArrayForColor:color];
+    if ([gradientLayer isKindOfClass:[CAGradientLayer class]])
+        gradientLayer.colors = [self gradientColorsArrayForColor:color];
     gradientLayer.opacity = (CGFloat)(color != NULL);
     
     UILabel *textLabel = [sender.subviews lastObject];
@@ -311,8 +450,12 @@
 }
 
 -(void)initializeButtons{
+    _isFlatDesign = SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0");
+    _isIpad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+    
     for (int buttonIndex=0; buttonIndex < [self numberOfButtons]; buttonIndex++)
         [self initializeButtonAtIndex:buttonIndex];
+    
 }
 
 #pragma Show view functions 
@@ -426,10 +569,21 @@
 #pragma mark UITableView delegate methods
 
 //If buttons are too many, then UIActionSheet creates table.
-//Instead of standart buttons UITableViewCell objects are used. 
+//Instead of standart buttons UITableViewCell objects are used.
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
+        //If there is flat design, than table frame should be updated to be the same size
+        //as th rounded rect of UIActionSheet
+        CGRect tableViewFrame = tableView.frame;
+        tableViewFrame.origin.y -= 10.0f;
+        tableViewFrame.size.height += 20.0f;
+        [tableView setFrame:tableViewFrame];
+    }
+    return 1;
+}
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-   // UITableViewCell *cell = (UITableViewCell *)[super tableView:tableView cellForRowAtIndexPath:indexPath];
     
     static NSString *identifier = @"UICustomActionSheet cell %d";
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault 
@@ -482,9 +636,9 @@
     if (self.cancelButtonIndex != -1 && buttonIndex >= self.cancelButtonIndex)
         buttonIndex++;
     
-    cell.textLabel.textAlignment = UITextAlignmentCenter;
+    cell.textLabel.textAlignment = NSTextAlignmentCenter;
     cell.textLabel.text = [self buttonTitleAtIndex:buttonIndex];
-    
+    cell.textLabel.backgroundColor = [UIColor clearColor];
     
     //Set background color for cell
     UIColor *backgroundColor = [self colorForButtonAtIndex:buttonIndex];
@@ -494,6 +648,7 @@
         backgroundView.backgroundColor = backgroundColor;
         cell.backgroundView = backgroundView;
         [backgroundView release];
+        
     }
     else
         cell.backgroundView = NULL;

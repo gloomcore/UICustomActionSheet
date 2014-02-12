@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5BDB58FF18AAC73A002CCF65 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5BDB58FB18AAC73A002CCF65 /* InfoPlist.strings */; };
+		5BDB590018AAC73A002CCF65 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5BDB58FD18AAC73A002CCF65 /* ViewController.xib */; };
 		9BD9714114B6FCB70041A1D9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD9714014B6FCB70041A1D9 /* UIKit.framework */; };
 		9BD9714314B6FCB70041A1D9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD9714214B6FCB70041A1D9 /* Foundation.framework */; };
 		9BD9714514B6FCB70041A1D9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD9714414B6FCB70041A1D9 /* CoreGraphics.framework */; };
@@ -14,7 +16,6 @@
 		9BD9714D14B6FCB80041A1D9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BD9714C14B6FCB80041A1D9 /* main.m */; };
 		9BD9715114B6FCB80041A1D9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BD9715014B6FCB80041A1D9 /* AppDelegate.m */; };
 		9BD9715414B6FCB80041A1D9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BD9715314B6FCB80041A1D9 /* ViewController.m */; };
-		9BD9715714B6FCB80041A1D9 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9BD9715514B6FCB80041A1D9 /* ViewController.xib */; };
 		9BD9716114B70D7A0041A1D9 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD9716014B70D7A0041A1D9 /* QuartzCore.framework */; };
 		9BD9717314B8A86B0041A1D9 /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BD9717114B8A86A0041A1D9 /* Facebook.png */; };
 		9BD9717414B8A86B0041A1D9 /* twitter.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BD9717214B8A86A0041A1D9 /* twitter.png */; };
@@ -22,6 +23,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5BDB58FC18AAC73A002CCF65 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
+		5BDB58FE18AAC73A002CCF65 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = ViewController.xib; sourceTree = "<group>"; };
 		9BD9713C14B6FCB70041A1D9 /* UICustomActionSheetSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UICustomActionSheetSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BD9714014B6FCB70041A1D9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9BD9714214B6FCB70041A1D9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -34,7 +37,6 @@
 		9BD9715014B6FCB80041A1D9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		9BD9715214B6FCB80041A1D9 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		9BD9715314B6FCB80041A1D9 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		9BD9715614B6FCB80041A1D9 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController.xib; sourceTree = "<group>"; };
 		9BD9716014B70D7A0041A1D9 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		9BD9717114B8A86A0041A1D9 /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
 		9BD9717214B8A86A0041A1D9 /* twitter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = twitter.png; sourceTree = "<group>"; };
@@ -57,6 +59,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5BDB58FA18AAC73A002CCF65 /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				5BDB58FB18AAC73A002CCF65 /* InfoPlist.strings */,
+				5BDB58FD18AAC73A002CCF65 /* ViewController.xib */,
+			);
+			path = en.lproj;
+			sourceTree = "<group>";
+		};
 		9BD9713114B6FCB70041A1D9 = {
 			isa = PBXGroup;
 			children = (
@@ -89,13 +100,13 @@
 		9BD9714614B6FCB70041A1D9 /* UICustomActionSheetSample */ = {
 			isa = PBXGroup;
 			children = (
+				5BDB58FA18AAC73A002CCF65 /* en.lproj */,
 				9BD9717114B8A86A0041A1D9 /* Facebook.png */,
 				9BD9717214B8A86A0041A1D9 /* twitter.png */,
 				9BD9714F14B6FCB80041A1D9 /* AppDelegate.h */,
 				9BD9715014B6FCB80041A1D9 /* AppDelegate.m */,
 				9BD9715214B6FCB80041A1D9 /* ViewController.h */,
 				9BD9715314B6FCB80041A1D9 /* ViewController.m */,
-				9BD9715514B6FCB80041A1D9 /* ViewController.xib */,
 				9BD9714714B6FCB80041A1D9 /* Supporting Files */,
 			);
 			path = UICustomActionSheetSample;
@@ -148,6 +159,15 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0420;
+				TargetAttributes = {
+					9BD9713B14B6FCB70041A1D9 = {
+						SystemCapabilities = {
+							com.apple.iOS = {
+								enabled = 0;
+							};
+						};
+					};
+				};
 			};
 			buildConfigurationList = 9BD9713614B6FCB70041A1D9 /* Build configuration list for PBXProject "UICustomActionSheetSample" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -171,8 +191,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5BDB590018AAC73A002CCF65 /* ViewController.xib in Resources */,
 				9BD9714B14B6FCB80041A1D9 /* InfoPlist.strings in Resources */,
-				9BD9715714B6FCB80041A1D9 /* ViewController.xib in Resources */,
+				5BDB58FF18AAC73A002CCF65 /* InfoPlist.strings in Resources */,
 				9BD9717314B8A86B0041A1D9 /* Facebook.png in Resources */,
 				9BD9717414B8A86B0041A1D9 /* twitter.png in Resources */,
 			);
@@ -195,20 +216,28 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		5BDB58FB18AAC73A002CCF65 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5BDB58FC18AAC73A002CCF65 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		5BDB58FD18AAC73A002CCF65 /* ViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5BDB58FE18AAC73A002CCF65 /* en */,
+			);
+			name = ViewController.xib;
+			sourceTree = "<group>";
+		};
 		9BD9714914B6FCB80041A1D9 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				9BD9714A14B6FCB80041A1D9 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		9BD9715514B6FCB80041A1D9 /* ViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				9BD9715614B6FCB80041A1D9 /* en */,
-			);
-			name = ViewController.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -263,7 +292,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "UICustomActionSheetSample/UICustomActionSheetSample-Prefix.pch";
 				INFOPLIST_FILE = "UICustomActionSheetSample/UICustomActionSheetSample-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
@@ -276,7 +305,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "UICustomActionSheetSample/UICustomActionSheetSample-Prefix.pch";
 				INFOPLIST_FILE = "UICustomActionSheetSample/UICustomActionSheetSample-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;

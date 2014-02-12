@@ -98,6 +98,8 @@
     
     [sheet setTextColor:[UIColor whiteColor] forButtonAtIndex:2];
     [sheet setTextColor:[UIColor whiteColor] forButtonAtIndex:3];
+
+    
     
     [sheet setImage:[UIImage imageNamed:@"Facebook.png"] forButtonAtIndex:2];
     [sheet setImage:[UIImage imageNamed:@"twitter.png"] forButtonAtIndex:3];
@@ -140,9 +142,24 @@
         [sheet setPressedTextColor:[UIColor whiteColor] forButtonAtIndex:i + 4];
     }
     
+    [sheet setColor:[UIColor whiteColor] forButtonAtIndex:[sheet destructiveButtonIndex]];
+    [sheet setColor:[UIColor blackColor] forButtonAtIndex:[sheet cancelButtonIndex]];
+    
     [sheet showFromTabBar:tabBar];
     
     [sheet autorelease];
+}
+
+-(IBAction)showStandardUIActionSheet{
+    UIActionSheet *basicSheet = [[UIActionSheet alloc] initWithTitle:@"DefaultTitle"
+                                                            delegate:self
+                                                   cancelButtonTitle:@"Cancel Button"
+                                              destructiveButtonTitle:@"Desctructive Button"
+                                                   otherButtonTitles:@"Button 1", @"Button 2", nil];
+    
+    
+    [basicSheet showFromTabBar:tabBar];
+    [basicSheet autorelease];
 }
 
 #pragma mark UIActionSheetDelegate methods

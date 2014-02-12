@@ -26,6 +26,8 @@
 
 @interface UICustomActionSheet : UIActionSheet{
     NSMutableArray *_buttonAttributes;
+    BOOL _isFlatDesign;
+    BOOL _isIpad;
 }
 
 -(void)setFont:(UIFont *)font forButtonAtIndex:(NSInteger)index;
